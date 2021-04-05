@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"sync"
 	"testing"
 )
 
@@ -16,20 +17,16 @@ const (
 )
 
 func BenchmarkSha1k(b *testing.B) {
-	benchmarkSha(Kilo, b)
+	benchmarkSha(Kilo, 1000, b)
 }
 
 func BenchmarkSha1m(b *testing.B) {
-	benchmarkSha(Mega, b)
+	benchmarkSha(Mega, 1000, b)
 }
 
-func BenchmarkSha1g(b *testing.B) {
-	benchmarkSha(Giga, b)
-}
-
-func benchmarkSha(len int, b *testing.B) {
+func benchmarkSha(len, amount int, b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		makeSha(len)
+		multiTh(amount, len)
 	}
 }
 
@@ -42,4 +39,18 @@ func makeSha(len int) {
 
 	h := sha256.New()
 	h.Write(source)
+}
+
+func multiTh(amount, len int) {
+
+	var wg sync.WaitGroup
+	wg.Add(amount)
+
+	for i := 0; i < amount; i++ {
+		go func() {
+			defer wg.Done()
+			makeSha(len)
+		}()
+	}
+	wg.Wait()
 }
