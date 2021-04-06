@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+//goland:noinspection ALL
 const (
 	Kilo int = 1024
 	Mega     = Kilo * 1024
@@ -40,7 +41,18 @@ func benchmarkSeqSha(len int, b *testing.B) {
 	}
 }
 
+func BenchmarkRunParallelSha1m(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			makeSha(Mega)
+		}
+	})
+}
+
 func makeSha(len int) {
+
+	//fmt.Printf("\rthreads: %d", runtime.NumGoroutine())
+
 	source := make([]byte, len)
 	_, err := rand.Read(source)
 	if err != nil {
