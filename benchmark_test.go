@@ -16,17 +16,27 @@ const (
 	Exa      = Peta * 1024
 )
 
-func BenchmarkSha1k(b *testing.B) {
+func BenchmarkParallelSha1k(b *testing.B) {
 	benchmarkSha(Kilo, 1000, b)
 }
 
-func BenchmarkSha1m(b *testing.B) {
+func BenchmarkParallelSha1m(b *testing.B) {
 	benchmarkSha(Mega, 1000, b)
+}
+
+func BenchmarkSeqSha1m(b *testing.B) {
+	benchmarkSeqSha(Mega, b)
 }
 
 func benchmarkSha(len, amount int, b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		multiTh(amount, len)
+	}
+}
+
+func benchmarkSeqSha(len int, b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		makeSha(len)
 	}
 }
 
